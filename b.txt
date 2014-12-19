@@ -1,0 +1,84 @@
+CREATE TABLE pub_houses (
+  pbh_id INT PRIMARY KEY,
+  name VARCHAR(50),
+  address VARCHAR(50),
+  country VARCHAR(50),
+  phone VARCHAR(30)
+);
+CREATE TABLE authors (
+  au_id INT  PRIMARY KEY,
+  first_name VARCHAR(50),
+  last_name  VARCHAR(50),
+  birth_date DATE,
+  death_time DATE,
+  country VARCHAR(50)
+);
+CREATE TABLE books (
+  book_id INT PRIMARY KEY,
+  pbh_id INT references pub_houses(pbh_id),
+  pages INT,
+  price FLOAT,	
+  name VARCHAR(50),
+  format VARCHAR(50),
+  au_id INT references authors(au_id),
+  udc varchar(50),
+  pub_year varchar(5)
+);
+CREATE TABLE genres (
+  genre_id INT PRIMARY KEY,
+  name VARCHAR(50)
+);
+
+CREATE TABLE users (
+  user_id INT PRIMARY KEY,
+  name VARCHAR(50),
+  login VARCHAR(30),
+  password VARCHAR(30),
+  reg_date DATE,
+  info VARCHAR(100),
+  rating INT
+);
+CREATE TABLE books_genre (
+  book_id INT references books(book_id),
+  genre_id INT references genres(genre_id)
+);
+CREATE TABLE stores (
+  store_id INT PRIMARY KEY,
+  name VARCHAR(50),
+  address VARCHAR(50),
+  phone VARCHAR(30),
+  work_time VARCHAR(50)
+);
+CREATE TABLE books_avaliability (
+  book_id INT references books(book_id),
+  store_id INT references stores(store_id),
+  cnt INT
+);
+CREATE TABLE reviews (
+  review_id INT PRIMARY KEY,
+  book_id INT references books(book_id),
+  user_id INT references users(user_id),
+  rev_date DATE,
+  text VARCHAR(300),
+  usefulness INT,
+  rate INT
+);
+CREATE TABLE top100 (
+  book_id INT references books(book_id),
+  top100_id INT PRIMARY KEY
+);
+CREATE TABLE orders (
+  order_id INT PRIMARY KEY,
+  user_id INT references users(user_id),
+  store_id INT references stores(store_id),
+  address VARCHAR(70),
+  order_date_create DATE,
+  order_date_destination DATE
+);
+CREATE TABLE orders_entre (
+  order_id INT references orders(order_id),
+  book_id INT references books(book_id),
+  book_cnt INT
+);
+
+
