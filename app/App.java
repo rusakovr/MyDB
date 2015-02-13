@@ -10,13 +10,11 @@ public static void main(String[] args) throws Exception{
         PrintStream printStream = new PrintStream(System.out, true, "cp866");
 	Scanner sc = new Scanner(System.in);
 	Connection conn=null;
-        //Создаём подключение к базе данных
 	conn = DriverManager.getConnection(base_addr,"SYSDBA", "masterkey");
 	if (conn==null)
 	{
             System.err.println("Could not connect to database");
 	} 
-        // Класс для выполнения SQL запросов
         Statement st = conn.createStatement();
         ResultSet rs;
         int t=0;
@@ -36,14 +34,8 @@ public static void main(String[] args) throws Exception{
                 }    
             
             if(t==1)
-            { 
-                //Выполняем SQL запрос.
-          
-           rs = st.executeQuery("select * FROM  genres;");
-           
-           
-
-                // Выводим результат.
+            {  
+                rs = st.executeQuery("select * FROM  genres order by genre_id;");   
                 while(rs.next())
                 {
                         System.out.println();
@@ -54,20 +46,26 @@ public static void main(String[] args) throws Exception{
             }
             if(t==2)
             { 
-                printStream.println("Insert genre_id");
-                int kol;
-                        if(sc.hasNextInt())
-                        {
-                            kol=sc.nextInt();
-                            printStream.println("Insert genre_name");
-                        }
-                        else 
-                        {
-                            sc.next();
-                            printStream.println("Wrong value, insert  genre again");
-                            continue;
-                        }
+                int kol=0,cnt=0;
+                    printStream.println("Insert genre_name");
+                    
                     String tstr=sc.next();
+                    rs = st.executeQuery("select  count(genre_id) FROM  genres where name ='"  + tstr +  "';");
+                    while(rs.next())
+                    {
+                        cnt=rs.getInt(1);
+                    }
+                    if(cnt!=0)
+                    {
+                        printStream.println("This genre  already exist");
+                        continue;
+                    }
+                    rs = st.executeQuery("select first 1 genre_id FROM  genres order  by genre_id desc ;");
+                     while(rs.next())
+                {
+                        kol=rs.getInt(1);
+                }
+                    kol++;
                     tstr="INSERT INTO genres (genre_id,name) VALUES ("+String.valueOf(kol)+",'"+tstr+"')";
                     try
                     {
@@ -82,26 +80,49 @@ public static void main(String[] args) throws Exception{
             }
             if(t==3)
             { 
-                printStream.println("Insert   order id");
+                printStream.println("Insert   genre_id");
                 int t1=0;
-                    if(sc.hasNextInt())
-                    {
-                        t1=sc.nextInt();
-                        rs = st.executeQuery("select order_id FROM  orders where order_id=" + Integer.toString(t1) +  ";");
-                        if (!rs.isBeforeFirst() ) {    
-                            printStream.println("This order is not exist");
-                            continue;
-                        } 
-                    }
-                    else
-                    {
-                        sc.next();
-                        printStream.println("Wrong value");
+                if(sc.hasNextInt())
+                {
+                    t1=sc.nextInt();
+                    rs = st.executeQuery("select genre_id FROM  genres where genre_id=" + Integer.toString(t1) +  ";");
+                    if (!rs.isBeforeFirst() ) {    
+                        printStream.println("This genre is not exist");
                         continue;
-                    }    
-                CallableStatement call_stmt=conn.prepareCall("{call lab5(?)}");
+                    } 
+                }
+                else
+                {
+                    sc.next();
+                    printStream.println("Wrong value");
+                    continue;
+                }  
+                Date s1,s2;
+                String tstr1=sc.next();
+                try
+                {
+                    s1=Date.valueOf(tstr1);
+                }
+                catch(java.lang.IllegalArgumentException e)
+                {
+                    printStream.println("Wrong date");
+                    continue;
+                }
+                String tstr2=sc.next(); 
+                try
+                {
+                    s2=Date.valueOf(tstr2);
+                }
+                catch(java.lang.IllegalArgumentException e)
+                {
+                    printStream.println("Wrong date");
+                    continue;
+                }
+                CallableStatement call_stmt=conn.prepareCall("{call lab4_1(?,?,?)}");
                 call_stmt.setInt(1, t1);
-                call_stmt.registerOutParameter(1, Types.INTEGER);
+                call_stmt.setDate(2, s1);
+                call_stmt.setDate(3, s2);
+                call_stmt.registerOutParameter(1, Types.FLOAT);
                 call_stmt.execute();
                 float result = call_stmt.getFloat(1);
                 System.out.println("Cost: "+result);           
